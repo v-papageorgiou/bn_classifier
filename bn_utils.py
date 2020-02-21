@@ -20,11 +20,16 @@ class BayesianNetwork:
     ========================== DOC ==================
     """
 
-    def __init__(self, file_name):
+    def __init__(self, file_name='', graph=None, cpts=None):
         self.graph = {}     # the graph that corresponds to the bayesian network
         self.cpts = {}      # a dict that holds the conditional probability table of each vertex
 
-        self.generate_network(file_name)
+        # if graph and cpts are given
+        if graph and cpts:
+            self.graph = graph
+            self.cpts = cpts
+        else:
+            self.generate_network(file_name)
 
     def generate_network(self, file_name):
         """
