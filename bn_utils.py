@@ -17,7 +17,8 @@ def normalize(q):
 
 class BayesianNetwork:
     """
-    ========================== DOC ==================
+    Class that implements the representation of a bayesian network, as well as some basic utilities such as exact
+    and approximate inference and data generation
     """
 
     def __init__(self, file_name='', graph=None, cpts=None):
