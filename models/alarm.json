@@ -1,0 +1,39 @@
+
+{
+  "b": {
+    "parents": [],
+    "adj": ["a"],
+    "cpt": [0.001]
+  },
+  "e": {
+    "parents": [],
+    "adj": ["a"],
+    "cpt": [0.002]
+  },
+  "a": {
+    "parents": ["b", "e"],
+    "adj": ["j", "m"],
+    "cpt": [
+      [true, true, 0.95],
+      [true, false, 0.94],
+      [false, true, 0.29],
+      [false, false, 0.001]
+    ]
+  },
+  "j": {
+    "parents": ["a"],
+    "adj": [],
+    "cpt": [
+      [true, 0.90],
+      [false, 0.05]
+    ]
+  },
+  "m": {
+    "parents": ["a"],
+    "adj": [],
+    "cpt": [
+      [true, 0.70],
+      [false, 0.01]
+    ]
+  }
+}

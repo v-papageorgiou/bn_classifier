@@ -1,4 +1,3 @@
-from ctypes import py_object
 
 import pandas as pd
 import numpy as np
@@ -12,33 +11,21 @@ import abc
 class BNClassifier(abc.ABC):
 
     @abc.abstractmethod
-    def __init__(self, file_name, label, train_percentage=1.0):
+    def __init__(self, data_frame, label):
 
-        # read the csv file and create a pandas data frame
-        try:
-            self.data_frame = pd.read_csv(file_name)
-            self.data_frame = self.data_frame.head(self.data_frame.shape[0] * math.floor(train_percentage))
-        except IOError:
-            print('Error reading file: {}'.format(file_name))
-            return
+        # assign training data
+        self.training_data_frame = data_frame
 
         # label of classification
         self.label = label
 
         # names of features
-        self.features = list(self.data_frame.columns)
+        self.features = list(self.training_data_frame.columns)
         self.features.remove(label)
 
         # learnt structure and cpts
         self.graph = {}
         self.cpts = {}
-
-    # @abc.abstractmethod
-    # def maximum_likelihood(self):
-    #     """
-    #     Calculates maximum likelihood of feature v
-    #     """
-    #     pass
 
 
 class TANClassifier(BNClassifier):
@@ -46,13 +33,13 @@ class TANClassifier(BNClassifier):
     Tree Augmented Naive Bayes classifier
     """
 
-    def __init__(self, file_name, label, train_percentage=1.0):
-        super().__init__(file_name, label, train_percentage)
+    def __init__(self, data_frame, label, naive_bayes):
+        super().__init__(data_frame, label)
 
-        _, cols = self.data_frame.shape  # number of features (label included)
+        _, cols = self.training_data_frame.shape  # number of features (label included)
         self.adjacency_matrix = np.zeros((cols - 1, cols - 1))  # initialization of adjacency matrix (label excluded)
         self.generate_adjacency_matrix()
-        self.build_classifier()
+        self.build_classifier(naive_bayes)
 
     def generate_adjacency_matrix(self):
         """
@@ -64,7 +51,7 @@ class TANClassifier(BNClassifier):
         for i in range(len(self.features)):
             for j in range(i + 1, len(self.features)):
                 mut_info = self.conditional_mutual_information(self.features[i], self.features[j],
-                                                               self.data_frame.shape[0])
+                                                               self.training_data_frame.shape[0])
                 self.adjacency_matrix[i][j] = self.adjacency_matrix[j][i] = mut_info
 
     def conditional_mutual_information(self, feature_1, feature_2, n_samples):
@@ -76,7 +63,7 @@ class TANClassifier(BNClassifier):
         :param n_samples: number of samples
         :return: conditional mutual information
         """
-        cols = copy.deepcopy(self.data_frame)[[feature_1, feature_2, self.label]]  # get features' and label's columns
+        cols = copy.deepcopy(self.training_data_frame)[[feature_1, feature_2, self.label]]  # get features' and label's columns
         mutual_info = 0  # return value
         for val_label in [True, False]:
             for val2 in [True, False]:
@@ -112,9 +99,6 @@ class TANClassifier(BNClassifier):
             """
             Gives directions to max_st using DFS
             """
-            # check if all vertices are marked
-            # if sum([_v for _v in marked.values()]) == len(marked):
-            #     return
 
             for u in max_st[vertex]:
                 if not marked[u]:  # if adjacent vertex is not marked
@@ -135,7 +119,7 @@ class TANClassifier(BNClassifier):
 
     def maximum_likelihood(self, v, subgraph, marked, parent):
         """
-        Calculates the cpts (self.cpts) of self. graph using the maximum liklihood rule
+        Calculates the cpts (self.cpts) of self. graph using the maximum likelihood rule
         :param v: The vertex whose cpt is being calculated
         :param subgraph: The subtree of self.graph that only contains the features
         :param marked: A dict which holds which vertices have been processed
@@ -165,14 +149,14 @@ class TANClassifier(BNClassifier):
 
             # if we calculate the cpt of the label vertex
             if v == self.label:
-                data = copy.deepcopy(self.data_frame[v])
+                data = copy.deepcopy(self.training_data_frame[v])
                 p_true = data.sum() / data.shape[0]
                 self.cpts[v].append('prob')
                 self.cpts[v].append(p_true)
                 return
 
             # get columns of label and v
-            data = copy.deepcopy(self.data_frame[[self.label, v]])
+            data = copy.deepcopy(self.training_data_frame[[self.label, v]])
             self.cpts[v].append([self.label, 'prob'])
 
             # for all the values of the label
@@ -181,12 +165,12 @@ class TANClassifier(BNClassifier):
                 data_label = data[data[self.label] == val_label]
 
                 # probability of v given the value of the label
-                p_true = data_label[data_label[v] == True].shape[0] / data_label.shape[0]
+                p_true = data_label[data_label[v] == True].shape[0] / (10**-8 + data_label.shape[0])
                 self.cpts[v].append([val_label, p_true])
         else:
 
             # get columns of label, parent and v
-            data = copy.deepcopy(self.data_frame[[self.label, parent, v]])
+            data = copy.deepcopy(self.training_data_frame[[self.label, parent, v]])
             self.cpts[v].append([self.label, parent, 'prob'])
 
             for val_label in [True, False]:     # for all the values of the label
@@ -196,14 +180,21 @@ class TANClassifier(BNClassifier):
                     data_label_par = data[(data[self.label] == val_label) & (data[parent] == val_par)]
 
                     # probability of v give the values of the label and the (only) parent
-                    p_true = data_label_par[data_label_par[v] == True].shape[0] / data_label_par.shape[0]
+                    p_true = data_label_par[data_label_par[v] == True].shape[0] / (10**-8 + data_label_par.shape[0])
                     self.cpts[v].append([val_label, val_par, p_true])
 
-    def build_classifier(self):
+    def build_classifier(self, naive_bayes):
 
-        # learn structure of TAN classifier
-        self.graph = self.chow_liu()
-        self.graph[self.label] = [v for v in self.graph]
+        # case of TAN classifier
+        if not naive_bayes:
+            # learn structure of TAN classifier
+            self.graph = self.chow_liu()
+            self.graph[self.label] = [v for v in self.graph]
+
+        else:
+            for f in self.features:
+                self.graph[f] = []
+            self.graph[self.label] = [f for f in self.graph]
 
         # learn parameters of TAN classifier
         graph_features = copy.deepcopy(self.graph)  # get feature subgraph
@@ -221,5 +212,3 @@ class TANClassifier(BNClassifier):
 
         # calculate cpt of label
         self.calc_cpt(self.label, None)
-
-        print(self.cpts)

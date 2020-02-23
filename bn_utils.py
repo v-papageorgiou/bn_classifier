@@ -1,4 +1,4 @@
-
+import pandas as pd
 import graph_utils
 import json
 import random
@@ -12,7 +12,7 @@ def normalize(q):
     :param q: A distribution
     :return: The values of q, so that they are probability values
     """
-    return [round(norm_q / sum(q), 8) for norm_q in q]
+    return [norm_q / sum(q) for norm_q in q]
 
 
 class BayesianNetwork:
@@ -21,8 +21,8 @@ class BayesianNetwork:
     """
 
     def __init__(self, file_name='', graph=None, cpts=None):
-        self.graph = {}     # the graph that corresponds to the bayesian network
-        self.cpts = {}      # a dict that holds the conditional probability table of each vertex
+        self.graph = {}  # the graph that corresponds to the bayesian network
+        self.cpts = {}  # a dict that holds the conditional probability table of each vertex
 
         # if graph and cpts are given
         if graph and cpts:
@@ -52,14 +52,14 @@ class BayesianNetwork:
             # Fill dictionaries graph and cpts
             for key in data:
                 self.graph[key] = data[key]['adj']  # adjacency list
-                if not data[key]['parents']:        # case of no parent vertices
+                if not data[key]['parents']:  # case of no parent vertices
                     cpt = ['prob']
                     cpt.extend(data[key]['cpt'])
 
                 else:
-                    cpt = [data[key]['parents']]        # list of parent vertices
-                    cpt.extend(data[key]['cpt'])        # merge parent vertices and cpt values
-                    cpt[0].append('prob')               # append the name of the last column ('prob')
+                    cpt = [data[key]['parents']]  # list of parent vertices
+                    cpt.extend(data[key]['cpt'])  # merge parent vertices and cpt values
+                    cpt[0].append('prob')  # append the name of the last column ('prob')
 
                 self.cpts[key] = cpt
 
@@ -75,7 +75,7 @@ class BayesianNetwork:
             file_name: The name of the file that the data are to be written to
         """
 
-        top_sort_v = graph_utils.topological_sort(self.graph)    # vertices topologically sorted
+        top_sort_v = graph_utils.topological_sort(self.graph)  # vertices topologically sorted
         try:
             with open(file_name + '.csv', 'w') as file:
                 file.write(','.join(top_sort_v) + '\n')
@@ -97,7 +97,7 @@ class BayesianNetwork:
         # Dictionary that holds the value of each
         # random for the current sample
         sample = {}
-        for u in top_sort_v:    # initialization
+        for u in top_sort_v:  # initialization
             sample[u] = False
 
         # Iterate all vertices
@@ -109,7 +109,7 @@ class BayesianNetwork:
 
             # case of vertex with parents
             else:
-                parents = self.cpts[u][0][0:-1]     # parent vertices
+                parents = self.cpts[u][0][0:-1]  # parent vertices
 
                 parent_values = []  # boolean list that holds the values of each parent for the current sample
                 for v in parents:
@@ -119,7 +119,7 @@ class BayesianNetwork:
                 bin_val = 1
                 idx = 1
                 for p_val in parent_values[::-1]:
-                    idx += (1-p_val)*bin_val
+                    idx += (1 - p_val) * bin_val
                     bin_val <<= 1
 
                 prob = float(self.cpts[u][idx][len(parents)])  # probability of the current random variable to be True
@@ -148,13 +148,12 @@ class BayesianNetwork:
                 print('Invalid arguments')
                 return None
 
-        q = []                                                  # the distribution of x
-        e = copy.deepcopy(evidence)                             # deep copy the evidence
-        variables = graph_utils.topological_sort(self.graph)    # bayesian network variables topologically ordered
+        q = []  # the distribution of x
+        e = copy.deepcopy(evidence)  # deep copy the evidence
+        variables = graph_utils.topological_sort(self.graph)  # bayesian network variables topologically ordered
 
         # for all the possible values of x
         for val in [True, False]:
-
             # extend evidence with current x value
             e[x] = val
 
@@ -165,20 +164,16 @@ class BayesianNetwork:
     def enumerate_all(self, variables, evidence):
         """
         Enumerate over all variables.
-
-        :param evidence:
-        :param variables:
-        :return:
         """
         if not variables:
             return 1.0
 
-        y = variables[0]    # get first variable
-        if y in evidence:   # if y has a value in evidence
+        y = variables[0]  # get first variable
+        if y in evidence:  # if y has a value in evidence
             return self.probability(y, evidence) * self.enumerate_all(variables[1:], evidence)
 
-        else:               # if y has no value in evidence
-            ey = copy.deepcopy(evidence)     # deepcopy evidence
+        else:  # if y has no value in evidence
+            ey = copy.deepcopy(evidence)  # deepcopy evidence
             probabilities = []
             for val in [True, False]:
                 ey[y] = val  # add y evidence to e
@@ -187,12 +182,7 @@ class BayesianNetwork:
             return sum(probabilities)
 
     def probability(self, y, evidence):
-        """
-        ============================= DOC =============================================================================================================================================
-        :param y:
-        :param evidence:
-        :return:
-        """
+
         if y not in self.graph:
             print('{} is not in graph'.format(y))
             return None
@@ -203,8 +193,8 @@ class BayesianNetwork:
 
         # if y has parents
         else:
-            cpt_y = np.array(self.cpts[y])      # cpt of y as numpy array
-            parents = list(cpt_y[0, :-1])       # parents of y
+            cpt_y = np.array(self.cpts[y])  # cpt of y as numpy array
+            parents = list(cpt_y[0, :-1])  # parents of y
             parent_evidence = []
             for p in parents:
                 parent_evidence.append(bool(evidence[p]))
@@ -212,7 +202,7 @@ class BayesianNetwork:
             parent_evidence = np.array(parent_evidence)
 
             # boolean numpy array that holds to which evidence does parent evidence refer
-            row = np.array(2**len(parent_evidence)*[True])
+            row = np.array(2 ** len(parent_evidence) * [True])
             for i in range(len(parent_evidence)):
                 row = np.logical_and(cpt_y[1:, i] == str(parent_evidence[i]), row)
 

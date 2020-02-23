@@ -1,0 +1,97 @@
+
+{
+  "immune_system": {
+    "parents": [],
+    "adj": ["pneumonia"],
+    "cpt": [0.05]
+  },
+  "smoking": {
+    "parents": [],
+    "adj": ["lung_cancer", "bronchitis"],
+    "cpt": [0.4]
+  },
+  "common_cold": {
+    "parents": [],
+    "adj": ["runny_nose", "fever"],
+    "cpt": [0.1]
+  },
+  "pneumonia": {
+    "parents": ["immune_system", "lung_cancer"],
+    "adj": ["fever", "chest_pain", "coughing"],
+    "cpt": [
+      [true, true, 0.92],
+      [true, false, 0.3],
+      [false, true, 0.6],
+      [false, false, 0.001]
+    ]
+  },
+  "lung_cancer": {
+    "parents": ["smoking"],
+    "adj": ["chest_pain", "dyspnoea"],
+    "cpt": [
+      [true, 0.1],
+      [false, 0.01]
+    ]
+  },
+  "bronchitis": {
+    "parents": ["smoking"],
+    "adj": ["coughing", "dyspnoea"],
+    "cpt": [
+      [true, 0.3],
+      [false, 0.01]
+    ]
+  },
+  "runny_nose": {
+    "parents": ["common_cold"],
+    "adj": [],
+    "cpt": [
+      [true, 0.9],
+      [false, 0.01]
+    ]
+  },
+  "fever": {
+    "parents": ["common_cold", "pneumonia"],
+    "adj": [],
+    "cpt": [
+      [true, true, 0.9],
+      [true, false, 0.9],
+      [false, true, 0.2],
+      [false, false, 0.01]
+    ]
+  },
+  "chest_pain": {
+    "parents": ["pneumonia", "lung_cancer"],
+    "adj": [],
+    "cpt": [
+      [true, true, 0.99],
+      [true, false, 0.6],
+      [false, true, 0.9],
+      [false, false, 0.1]
+    ]
+  },
+
+  "coughing": {
+    "parents": ["pneumonia", "bronchitis"],
+    "adj": [],
+    "cpt": [
+      [true, true, 0.99],
+      [true, false, 0.8],
+      [false, true, 0.9],
+      [false, false, 0.01]
+    ]
+  },
+  "dyspnoea": {
+    "parents": ["bronchitis", "lung_cancer", "pneumonia"],
+    "adj": [],
+    "cpt": [
+      [true, true, true, 0.99],
+      [true, true, false, 0.99],
+      [true, false, true, 0.7],
+      [true, false, false, 0.7],
+      [false, true, true, 0.9],
+      [false, true, false, 0.85],
+      [false, false, true, 0.2],
+      [false, false, false, 0.01]
+    ]
+  }
+}
