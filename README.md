@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Bayesian Classification
 In this project, the case of **Bayesian Classification** is studied, which is a
 specific type of classification procedure that utilizes **Bayes' theorem** in
@@ -20,9 +19,7 @@ Bayesian classifiers, **Naive Bayes** and **Tree Augmented Naive Bayes (TAN)**.
 ![alt text](report/figs/medical_network.png) -->
 
 
-In the ```*.json``` files under folder ```models/``` one can find the available networks that
-can be used in the scope of this project. Note that each file contains the structure
-as well as the **Conditional Probability Tables** of each network in a *json* format. These models are
+In the ```*.json``` files under folder ```models/``` one can find the available networks that can be used in the scope of this project. Note that each file contains the structure as well as the **Conditional Probability Tables** of each network in a *json* format. These models are
 used to implement the actual representation of each network, which is considered the ground truth.
 
 Having built the aforementioned networks, **prior sampling** is  utilized in order to generate
@@ -32,6 +29,7 @@ test the classifiers.
 More details can be found in ```report/report.pdf``` and ```presentation/presentation.pdf```.
 
 ## Code
+
 * ``main.py``: contains the driver code that is used to perform the experiments
   
 * ``graph_utils.py``: contains the implementation of various graph operations (topological
@@ -45,6 +43,3 @@ mented.
 which we implement the TAN as well as the Naive Bayes classifiers.
   
 * ``bn_test.py``: contains code that calculates the classification error of a learnt network.
-=======
-# Bayesian Network Classifier
->>>>>>> 2bf0db0f90c3721337adf41826c3375946f985c3
