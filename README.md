@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Bayesian Classification
 In this project, the case of **Bayesian Classification** is studied, which is a
 specific type of classification procedure that utilizes **Bayes' theorem** in
@@ -44,3 +45,6 @@ mented.
 which we implement the TAN as well as the Naive Bayes classifiers.
   
 * ``bn_test.py``: contains code that calculates the classification error of a learnt network.
+=======
+# Bayesian Network Classifier
+>>>>>>> 2bf0db0f90c3721337adf41826c3375946f985c3
