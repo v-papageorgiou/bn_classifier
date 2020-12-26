@@ -35,9 +35,8 @@ More details can be found in ```report/report.pdf``` and ```presentation/present
 * ``graph_utils.py``: contains the implementation of various graph operations (topological
 sort, prim’s algorithm)
   
-* ``bn_utils.py``: contains the implementation of a class named BayesianNetwork through
-which the representation as well as the varibale enumeration algorithm are imple-
-mented.
+* ``bn_utils.py``: contains the implementation of a class named ```BayesianNetwork()``` through
+which the representation as well as the varibale enumeration algorithm are implemented.
 
 * ``bn_classifier.py``: contains the implementation of the class ``TANClassifier()`` through
 which we implement the TAN as well as the Naive Bayes classifiers.
